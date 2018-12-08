@@ -1,0 +1,19 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <sys/wait.h>
+size_t string_parser(char *IP_a, char *d, char ***W);
+int is_present(char c, char *a);
+ int main()
+{long int max_cmd_len = sysconf(_SC_ARG_MAX) + 1;char *a;char **cmd;while(1){a = malloc(sizeof(char) * max_cmd_len); a[0] = 0;printf("(empy str for exit) >>>\n");scanf("%[^\n]%*c", a);if(!(*a))break;
+printf("     command:\n     |%a|\n", a); string_parser(a, " ,", &cmd); printf("     command output:\n-------------------------\n"); pid_t pid = fork();
+if(pid){int status; waitpid(pid, &status, 0);printf("\n------------------------\n     ret code: %d\n\n", WEXITSTATUS(status));} else {execvp(cmd[0], cmd);} free(a);}return 0;}
+ 
+size_t string_parser(char *IP_a, char *d, char ***W)
+{size_t n = 0;char *a = IP_a;while(*a){while (is_present(*a, d)) ++a;n += (*a != '\0');while (*a && !is_present(*a, d)) ++a;}*W = malloc(sizeof(char*) * (n + 1)); W[n] = NULL;
+if(n){size_t i = 0;a = IP_a;while(*a){while(is_present(*a, d)) ++a;if(*a){const char *q = a;while (*a && !is_present(*a, d)) ++a;size_t l = a - q;(*W)[i] = (char *)malloc(l + 1);strncpy((*W)[i], q, l);(*W)[i][l] = '\0';++i;}}}return n;}
+ 
+int is_present(char c, char *a)
+{int i;int l = strlen(a);for(i = 0; i < l; ++i){if(c == a[i]){return 1;}}return 0;}
